@@ -35,17 +35,17 @@
 #include <math.h>
 
 
+void action_get_max_etat( const intptr_t element, void* data){
+	int * max = (int*) data;
+	if ( *max < element ) *max = element;
+}
+
 int get_max_etat( const Automate* automate ){
 	int max = INT_MIN;
 
-	pour_tout_element( automate->etats, action_get_max_etats, &max);
+	pour_tout_element( automate->etats, action_get_max_etat, &max);
 
 	return max;
-}
-
-void action_get_max_etats( const intptr_t element, void* data){
-	int * max = (int*) data;
-	if ( *max < element ) *max = element;
 }
 
 void action_get_min_etat( const intptr_t element, void* data ){
