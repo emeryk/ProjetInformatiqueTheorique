@@ -479,32 +479,76 @@ Automate * mot_to_automate( const char * mot ){
 	ajouter_etat_final( automate, size );
 	return automate;
 }
+// Action pour ajouter tous les élements de l'ensemble à une ensemble d'états Initiaux
+void action_ajouter_etats_initiaux(const intptr_t element, void* data){
+    Automate* a = (Automate*) data ;
+    ajouter_etat_initial(a, element);
+}
 
-Automate * creer_union_des_automates(
-	const Automate * automate_1, const Automate * automate_2
-){
-	A_FAIRE_RETURN( NULL );
+// Action pour ajouter tous les élements de l'ensemble à une ensemble d'états Finaux
+void action_ajouter_etats_finaux(const intptr_t element, void* data){
+    Automate* a = (Automate*) data ;
+    ajouter_etat_final(a, element);
+}
+
+// Action pour ajouter tous les élements de l'ensemble à une ensemble d'états
+void action_ajouter_etats(const intptr_t element, void* data){
+    Automate* a = (Automate*) data ;
+    ajouter_etat(a, element);
+}
+
+void action_ajouter_alphabet(const intptr_t element, void* data){
+    Automate* a = (Automate*) data;
+    ajouter_lettre(a, element);
+}
+
+void action_ajouter_transition(int origine, char lettre, int fin, void* data){
+    Automate* a = (Automate*) data ;
+    ajouter_transition(a, origine, lettre, fin);
+}
+
+void action_ajouter_ensemble_vide(intptr_t element, void* data){
+
+}
+
+//Creer un automate a qui est l'union de automate_1 et automate_2
+// manque à gérer le cas de l'ensemble vide dans l'automate
+Automate * creer_union_des_automates(const Automate * automate_1, const Automate * automate_2){
+    Automate* a = copier_automate(automate_1);
+    Ensemble* new_etats = copier_ensemble(get_initiaux(automate_2));
+    pour_tout_element(new_etats, action_ajouter_etats_initiaux, a);
+    new_etats = copier_ensemble(get_finaux(automate_2));
+    pour_tout_element(new_etats, action_ajouter_etats_finaux, a);
+    new_etats = copier_ensemble(get_etats(automate_2));
+    pour_tout_element(new_etats, action_ajouter_etats, a);
+
+    new_etats = copier_ensemble(get_alphabet(automate_2));
+    pour_tout_element(new_etats, action_ajouter_alphabet, a);
+
+    pour_toute_transition(automate_2,action_ajouter_transition, a);
+
+    return a;
+
 }
 
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
-	A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL ); 
 }
 
 Ensemble* accessibles( const Automate * automate ){
-	A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL ); 
 }
 
 Automate *automate_accessible( const Automate * automate ){
-	A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL ); 
 }
 
 Automate *miroir( const Automate * automate){
-	A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL ); 
 }
 
 Automate * creer_automate_du_melange(
-	const Automate* automate_1,  const Automate* automate_2
-){
-	A_FAIRE_RETURN( NULL ); 
+    const Automate* automate_1,  const Automate* automate_2
+    ){
+    A_FAIRE_RETURN( NULL ); 
 }
-

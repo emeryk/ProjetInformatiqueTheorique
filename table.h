@@ -78,8 +78,7 @@ typedef struct avl_traverser Table_iterateur;
  *     printf( "cle : %d -> valeur : %d \n", get_cle( it ), get_valeur( it ) );
  * }
  *
- * liberer_table( t )
- *
+ * liberer_table( t ) *
  * 
  *=============================================================================
  *                        Exemple 2

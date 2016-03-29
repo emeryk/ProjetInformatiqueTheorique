@@ -49,20 +49,20 @@ typedef struct avl_traverser Ensemble_iterateur;
  *
  * L'ensemble peut contenir des entiers, codés à l'aide du type intptr_t.
  * Mais il peut aussi contenir des pointeurs vers des structures plus complexes.
- * Dans ce cas, c'est l'ensmeble qui devient le responsable de la mémoire des 
+ * Dans ce cas, c'est l'ensemble qui devient le responsable de la mémoire des
  * éléments situé à l'interieur de l'ensemble.
  * Pour pouvoir gérer cette mémoire, l'ensemble à besoin des fonctions :
  *   - int comparer_element( const intptr_t elem1, const intptr_t elem2 ),
  *   - intptr_t copier_element( const intptr_t elem ),
  *   - void supprimer_element( intptr_t elem ),
- * qui permettent de comaprer, upprimer et copier des éléments de l'ensemble.
+ * qui permettent de comparer, supprimer et copier des éléments de l'ensemble.
  *
  */
 Ensemble * creer_ensemble(
-	int (*comparer_element)( const intptr_t elem1, const intptr_t elem2 ),
-	intptr_t (*copier_element)( const intptr_t elem ),
-	void (*supprimer_element)( intptr_t elem )
-);
+  int (*comparer_element)( const intptr_t elem1, const intptr_t elem2 ),
+  intptr_t (*copier_element)( const intptr_t elem ),
+  void (*supprimer_element)( intptr_t elem )
+  );
 
 /*
  * Libère la mémoire d'un ensemble.
@@ -88,7 +88,7 @@ void ajouter_elements( Ensemble * ens1, const Ensemble * ens2 );
 /*
  * Transfère tous les élément de l'ensemble source dans l'ensemble destination
  * La mémoire de l'ensemble source n'est pas libérer.
- */
+*/
 void transferer_elements( Ensemble * destination, Ensemble * source );
 
 /*
@@ -156,33 +156,33 @@ Ensemble * creer_union_ensemble( const Ensemble* ens1, const Ensemble* ens2 );
  * paramètre.
  */
 Ensemble * creer_difference_ensemble(
-	const Ensemble* ens1, const Ensemble* ens2
-);
+  const Ensemble* ens1, const Ensemble* ens2
+  );
 
 /*
  * Créé un nouvel ensemble qui est l'intersection de deux ensembles passés en 
  * paramètre.
  */
 Ensemble * creer_intersection_ensemble(
-	const Ensemble* ens1, const Ensemble* ens2
-);
+  const Ensemble* ens1, const Ensemble* ens2
+  );
 
 /*
  * Passe en revue tous les éléments d'un ensemble et execute un fonction 
  * passée en paramètre.
  */
 void pour_tout_element(
-	const Ensemble* ensemble, 
-	void (* action )( const intptr_t element, void* data ),
-	void* data
-);
+  const Ensemble* ensemble, 
+  void (* action )( const intptr_t element, void* data ),
+  void* data
+  );
 
 /*
  * Affiche tous les éléments d'un ensemble.
  */
 void print_ensemble(
-	const Ensemble* ens, void (*print_element)( const intptr_t element ) 
-);
+  const Ensemble* ens, void (*print_element)( const intptr_t element ) 
+  );
 
 /*
  * Échange le contenu de deux ensembles passés en paramètre.
@@ -193,7 +193,7 @@ void swap_ensemble( Ensemble* ens1, Ensemble* ens2 );
  * Supprime le contenu de l'ensemble destination, déplace le contenu de 
  * l'ensemble source dans celui de destination et libère la mémoire
  * de l'ensemble source. 
- */
+*/
 void deplacer_ensemble( Ensemble* dest, Ensemble* source );
 
 /*
@@ -202,8 +202,8 @@ void deplacer_ensemble( Ensemble* dest, Ensemble* source );
  * paramètre.
  */
 Ensemble_iterateur trouver_ensemble(
-	const Ensemble* ensemble, const intptr_t element
-);
+  const Ensemble* ensemble, const intptr_t element
+  );
 
 /*
  * Renvoie un itérateur positionné sur le premier élement de l'ensemble.
