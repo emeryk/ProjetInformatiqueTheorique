@@ -528,10 +528,6 @@ Automate * creer_union_des_automates(const Automate * automate_1, const Automate
     pour_toute_transition(automate_2,action_ajouter_transition, a);
 
     return a;
-
-}
-
-void action_recuperer_etats_accessibles(intptr_t element, void* data){
 }
 
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
@@ -539,14 +535,33 @@ Ensemble* etats_accessibles( const Automate * automate, int etat ){
     A_FAIRE_RETURN( NULL );
 }
 
+// On récupère l'ensemble d'états accessibles pour une lettre et l'ensemble d'états initiaux
+// On les stocke dans le champs vide de l'automate.
+void action_recuperer_accessibles(intptr_t element, void* data){
+    Automate* a = (Automate*) data;
+    Ensemble* ens = copier_ensemble(get_initiaux(a));
+    ajouter_elements(a->vide, delta(a, ens, element));
+}
+
+// Pour chaque lettre de l'alphabet, on appelle action_recuperer_accessibles
+// Afin de stocker un ensmble avec tous les étas accessibles pour chaque lettre de l'alphabet de l'automate.
 Ensemble* accessibles( const Automate * automate ){
-    A_FAIRE_RETURN( NULL );
+    Automate* a = copier_automate(automate);
+    Ensemble* alp = copier_ensemble(get_alphabet(automate));
+    pour_tout_element(alp, action_recuperer_accessibles, a);
+    deplacer_ensemble(alp, a->vide);
+    return alp;
 }
 
 Automate *automate_accessible( const Automate * automate ){
-    A_FAIRE_RETURN( NULL );
-}
+    Automate* a = copier_automate(automate);
+    Ensemble* etat_acc = accessibles(automate);
+    Ensemble* etat_non_acc = creer_difference_ensemble(get_etats(automate), etat_acc);
 
+    transferer_elements(a->etats, etat_non_acc);
+    Automate* accessible = translater_automate(automate, a);
+    return accessible;
+}
 
 // Ajoute les transitions d'un premier automate à un second en inversant l'oigine et la fin des transitions
 void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
@@ -575,8 +590,6 @@ Automate *miroir( const Automate * automate){
     return a;
 }
 
-Automate * creer_automate_du_melange(
-    const Automate* automate_1,  const Automate* automate_2
-    ){
+Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){
     A_FAIRE_RETURN( NULL );
 }
