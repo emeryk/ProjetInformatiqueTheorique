@@ -389,19 +389,16 @@ Automate * translater_automate(
 		taille_ensemble( get_etats(automate_a_eviter) ) == 0
 	){
 		return copier_automate( automate );
-	}
-	
-	int translation = 
-		get_max_etat( automate_a_eviter ) - get_min_etat( automate ) + 1; 
+    }
 
-	return translater_automate_entier( automate, translation );
-	
+    int translation = get_max_etat( automate_a_eviter ) - get_min_etat( automate ) + 1;
+    return translater_automate_entier( automate, translation );
 }
 
 int est_une_transition_de_l_automate(
 	const Automate* automate,
 	int origine, char lettre, int fin
-){
+    ){
 	return est_dans_l_ensemble( voisins( automate, origine, lettre ), fin );
 }
 
@@ -479,6 +476,9 @@ Automate * mot_to_automate( const char * mot ){
 	ajouter_etat_final( automate, size );
 	return automate;
 }
+
+/***************Fonctions completées****************/
+
 // Action pour ajouter tous les élements de l'ensemble à une ensemble d'états Initiaux
 void action_ajouter_etats_initiaux(const intptr_t element, void* data){
     Automate* a = (Automate*) data ;
@@ -511,7 +511,7 @@ void action_ajouter_ensemble_vide(intptr_t element, void* data){
 
 }
 
-//Creer un automate a qui est l'union de automate_1 et automate_2
+// Creer un automate a qui est l'union de automate_1 et automate_2
 // manque à gérer le cas de l'ensemble vide dans l'automate
 Automate * creer_union_des_automates(const Automate * automate_1, const Automate * automate_2){
     Automate* a = copier_automate(automate_1);
@@ -531,24 +531,52 @@ Automate * creer_union_des_automates(const Automate * automate_1, const Automate
 
 }
 
+void action_recuperer_etats_accessibles(intptr_t element, void* data){
+}
+
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
-    A_FAIRE_RETURN( NULL ); 
+    delta1(automate, etat, 'c');
+    A_FAIRE_RETURN( NULL );
 }
 
 Ensemble* accessibles( const Automate * automate ){
-    A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL );
 }
 
 Automate *automate_accessible( const Automate * automate ){
-    A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL );
+}
+
+
+// Ajoute les transitions d'un premier automate à un second en inversant l'oigine et la fin des transitions
+void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
+    Automate* a = (Automate*) data ;
+    ajouter_transition(a, fin, lettre, origine);
 }
 
 Automate *miroir( const Automate * automate){
-    A_FAIRE_RETURN( NULL ); 
+    Automate* a = creer_automate();
+    Ensemble* ens;
+
+    ens = copier_ensemble(get_initiaux(automate));
+    pour_tout_element(ens, action_ajouter_etats_finaux, a);
+
+    ens = copier_ensemble(get_finaux(automate));
+    pour_tout_element(ens, action_ajouter_etats_initiaux, a);
+
+    ens = copier_ensemble(get_alphabet(automate));
+    pour_tout_element(ens, action_ajouter_alphabet, a);
+
+    ens = copier_ensemble(get_etats(automate));
+    pour_tout_element(ens, action_ajouter_etats, a);
+
+    pour_toute_transition(automate, action_ajouter_transition_inverse, a);
+
+    return a;
 }
 
 Automate * creer_automate_du_melange(
     const Automate* automate_1,  const Automate* automate_2
     ){
-    A_FAIRE_RETURN( NULL ); 
+    A_FAIRE_RETURN( NULL );
 }
