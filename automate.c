@@ -530,9 +530,22 @@ Automate * creer_union_des_automates(const Automate * automate_1, const Automate
     return a;
 }
 
+void action_recuperer_accessibles_etat(intptr_t element, void* data){
+  Automate* a = (Automate*) data;
+  
+  
+}
+
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
-    delta1(automate, etat, 'c');
-    A_FAIRE_RETURN( NULL );
+  Automate* a = copier_automate(automate);
+  Ensemble* alp = copier_ensemble(get_alphabet(automate));
+  Ensemble* old_vide = copier_ensemble(a->vide);
+
+
+  pour_tout_ensemble(alp, action_recuperer_accessibles_etat, a);
+  
+  delta1(automate, etat, 'c');
+  A_FAIRE_RETURN( NULL );
 }
 
 // On récupère l'ensemble d'états accessibles pour une lettre et l'ensemble d'états initiaux
@@ -548,8 +561,12 @@ void action_recuperer_accessibles(intptr_t element, void* data){
 Ensemble* accessibles( const Automate * automate ){
     Automate* a = copier_automate(automate);
     Ensemble* alp = copier_ensemble(get_alphabet(automate));
+    Ensemble* old_vide = copier_ensemble(a->vide);
+
     pour_tout_element(alp, action_recuperer_accessibles, a);
     deplacer_ensemble(alp, a->vide);
+    deplacer_ensemble(a->vide, old_vide);
+    
     return alp;
 }
 
@@ -590,6 +607,12 @@ Automate *miroir( const Automate * automate){
     return a;
 }
 
+char* melange(char* mot1, char* mot2){
+  char* w = strcat(mot1, mot2);
+  return w;
+}
+
 Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){
-    A_FAIRE_RETURN( NULL );
+
+    
 }
