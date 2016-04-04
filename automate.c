@@ -532,20 +532,25 @@ Automate * creer_union_des_automates(const Automate * automate_1, const Automate
 
 void action_recuperer_accessibles_etat(intptr_t element, void* data){
   Automate* a = (Automate*) data;
-  
-  
+  Ensemble* e = copier_ensemble(a->vide);
+  vider_ensemble(a->vide);
+
+  Ensemble_iterateur it = premier_iterateur_ensemble(e);
+  int etat = get_element(it);
+
+  ajouter_elements(a->vide, delta1(a, etat, element));
 }
 
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
-  Automate* a = copier_automate(automate);
-  Ensemble* alp = copier_ensemble(get_alphabet(automate));
-  Ensemble* old_vide = copier_ensemble(a->vide);
+    Automate* a = copier_automate(automate);
+    Ensemble* alp = copier_ensemble(get_alphabet(automate));
+    Ensemble* old_vide = copier_ensemble(a->vide);
 
+    vider_ensemble(a->vide);
+    ajouter_element(a->vide, etat);
+    pour_tout_element(alp, action_recuperer_accessibles_etat, a);
 
-  pour_tout_ensemble(alp, action_recuperer_accessibles_etat, a);
-  
-  delta1(automate, etat, 'c');
-  A_FAIRE_RETURN( NULL );
+    A_FAIRE_RETURN( NULL );
 }
 
 // On récupère l'ensemble d'états accessibles pour une lettre et l'ensemble d'états initiaux
@@ -581,38 +586,38 @@ Automate *automate_accessible( const Automate * automate ){
 }
 
 // Ajoute les transitions d'un premier automate à un second en inversant l'oigine et la fin des transitions
-void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
-    Automate* a = (Automate*) data ;
-    ajouter_transition(a, fin, lettre, origine);
-}
+  void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
+      Automate* a = (Automate*) data ;
+      ajouter_transition(a, fin, lettre, origine);
+  }
 
-Automate *miroir( const Automate * automate){
-    Automate* a = creer_automate();
-    Ensemble* ens;
+  Automate *miroir( const Automate * automate){
+      Automate* a = creer_automate();
+      Ensemble* ens;
 
-    ens = copier_ensemble(get_initiaux(automate));
-    pour_tout_element(ens, action_ajouter_etats_finaux, a);
+      ens = copier_ensemble(get_initiaux(automate));
+      pour_tout_element(ens, action_ajouter_etats_finaux, a);
 
-    ens = copier_ensemble(get_finaux(automate));
-    pour_tout_element(ens, action_ajouter_etats_initiaux, a);
+      ens = copier_ensemble(get_finaux(automate));
+      pour_tout_element(ens, action_ajouter_etats_initiaux, a);
 
-    ens = copier_ensemble(get_alphabet(automate));
-    pour_tout_element(ens, action_ajouter_alphabet, a);
+      ens = copier_ensemble(get_alphabet(automate));
+      pour_tout_element(ens, action_ajouter_alphabet, a);
 
-    ens = copier_ensemble(get_etats(automate));
-    pour_tout_element(ens, action_ajouter_etats, a);
+      ens = copier_ensemble(get_etats(automate));
+      pour_tout_element(ens, action_ajouter_etats, a);
 
-    pour_toute_transition(automate, action_ajouter_transition_inverse, a);
+      pour_toute_transition(automate, action_ajouter_transition_inverse, a);
 
-    return a;
-}
+      return a;
+  }
 
-char* melange(char* mot1, char* mot2){
-  char* w = strcat(mot1, mot2);
-  return w;
-}
+  char* melange(char* mot1, char* mot2){
+      char* w = strcat(mot1, mot2);
+      return w;
+  }
 
-Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){
+  Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){
 
     
-}
+  }
