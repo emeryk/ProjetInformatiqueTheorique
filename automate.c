@@ -507,10 +507,6 @@ void action_ajouter_transition(int origine, char lettre, int fin, void* data){
     ajouter_transition(a, origine, lettre, fin);
 }
 
-void action_ajouter_ensemble_vide(intptr_t element, void* data){
-
-}
-
 // Creer un automate a qui est l'union de automate_1 et automate_2
 // manque à gérer le cas de l'ensemble vide dans l'automate
 Automate * creer_union_des_automates(const Automate * automate_1, const Automate * automate_2){
@@ -544,13 +540,18 @@ void action_recuperer_accessibles_etat(intptr_t element, void* data){
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
     Automate* a = copier_automate(automate);
     Ensemble* alp = copier_ensemble(get_alphabet(automate));
-    Ensemble* old_vide = copier_ensemble(a->vide);
-
-    vider_ensemble(a->vide);
-    ajouter_element(a->vide, etat);
-    pour_tout_element(alp, action_recuperer_accessibles_etat, a);
-
-    A_FAIRE_RETURN( NULL );
+    Ensemble* etats_acc = creer_ensemble();
+    char lettre;
+    
+    Ensemble_iterateur it = premier_iterateur_ensemble(alp);
+    
+    while(!iterateur_est_vide(it)){
+        lettre = get_element(it);
+        ajouter_elements(etat_acc, delta1(a, etat, lettre));
+        it = iterateur_suivant_ensemble(it);
+    }
+    
+    return etat_acc;
 }
 
 // On récupère l'ensemble d'états accessibles pour une lettre et l'ensemble d'états initiaux
@@ -572,7 +573,6 @@ Ensemble* accessibles( const Automate * automate ){
     deplacer_ensemble(alp, a->vide);
     deplacer_ensemble(a->vide, old_vide);
     
-    return alp;
 }
 
 Automate *automate_accessible( const Automate * automate ){
