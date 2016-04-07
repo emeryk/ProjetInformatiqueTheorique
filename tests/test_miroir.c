@@ -48,6 +48,9 @@ int test_automate_accessible(){
 			&& ! le_mot_est_reconnu( aut, "aaa" )
 			&& ! le_mot_est_reconnu( aut, "aba" )
 			&& ! le_mot_est_reconnu( aut, "bba" )
+			&& (est_un_etat_initial_de_l_automate( aut, 2) == 1)
+			&& (est_un_etat_final_de_l_automate( aut, 1) == 1)
+			&& ! (est_un_etat_final_de_l_automate( aut, 2) == 1)
 			, result
 		);
 		liberer_automate( aut );

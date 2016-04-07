@@ -30,6 +30,7 @@ int test_automate_accessible(){
 
 		ajouter_transition( automate, 1, 'a', 1 );
 		ajouter_transition( automate, 1, 'b', 2 );
+		ajouter_transition( automate, 3, 'c', 3);
 		ajouter_etat_initial( automate, 1);
 		ajouter_etat_final( automate, 2);
 
@@ -48,6 +49,8 @@ int test_automate_accessible(){
 			&& ! le_mot_est_reconnu( aut, "aaa" )
 			&& ! le_mot_est_reconnu( aut, "aba" )
 			&& ! le_mot_est_reconnu( aut, "abb" )
+			&& ! le_mot_est_reconnu( aut, "c" )
+			&& (est_un_etat_de_l_automate( aut, 3) == 0)
 			, result
 		);
 		liberer_automate( aut );
