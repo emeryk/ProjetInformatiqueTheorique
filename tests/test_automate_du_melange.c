@@ -33,6 +33,79 @@ int test_automate_du_melange(){
 	int result = 1;
 
 	{
+		Automate * aut1 = creer_automate();
+		ajouter_etat_final(aut1, 2);
+		ajouter_etat_final(aut1, 7);
+		ajouter_etat_initial(aut1, 0);
+		ajouter_transition(aut1, 0, 'b', 0);
+		ajouter_transition(aut1, 0, 'a', 2);
+		ajouter_transition(aut1, 0, 'a', 7);
+		ajouter_transition(aut1, 2, 'a', 7);
+
+		Automate * aut2 = creer_automate();
+		ajouter_etat_final(aut2, 3);
+		ajouter_etat_initial(aut2, 1);
+		ajouter_transition(aut2, 1, 'b', 1);
+		ajouter_transition(aut2, 1, 'a', 3);
+		ajouter_transition(aut2, 3, 'a', 3);
+		ajouter_transition(aut2, 3, 'a', 1);
+
+		Automate * melange = creer_automate_du_melange(aut1, aut2);
+
+		TEST(
+			1
+			&& melange
+			&& est_un_etat_final_de_l_automate(melange, 23)
+			&& est_un_etat_final_de_l_automate(melange, 73)
+			&& ! est_un_etat_final_de_l_automate(melange, 32)
+			&& ! est_un_etat_final_de_l_automate(melange, 37)
+			&& ! est_un_etat_final_de_l_automate(melange, 21)
+			, result
+		);
+		wrap_liberer_automate( aut1 );
+		wrap_liberer_automate( aut2 );
+		wrap_liberer_automate( melange );
+	}
+	
+
+
+	{
+		Automate * aut1 = creer_automate();
+		ajouter_transition(aut1, 0, 'b', 0);
+		ajouter_transition(aut1, 0, 'a', 1);
+		ajouter_transition(aut1, 1, 'a', 2);
+		ajouter_transition(aut1, 2, 'a', 2);
+		ajouter_transition(aut1, 2, 'b', 1);
+		ajouter_transition(aut1, 1, 'b', 0);
+		ajouter_etat_initial(aut1, 0);
+		ajouter_etat_final(aut1, 2);
+
+		Automate * aut2 = creer_automate();
+		ajouter_transition(aut2, 0, 'c', 1);
+		ajouter_transition(aut2, 1, 'c', 0);
+		ajouter_etat_initial(aut2, 0);
+		ajouter_etat_final(aut2, 0);
+
+		Automate * melange = creer_automate_du_melange(aut1, aut2);
+
+		TEST(
+			1
+			&& melange
+			&& est_un_etat_de_l_automate(melange, 0)
+			&& est_un_etat_initial_de_l_automate(melange, 0)
+			&& est_un_etat_de_l_automate(melange, 20)
+			&& est_un_etat_final_de_l_automate(melange, 20)
+			&& le_mot_est_reconnu(melange, "baccaabcaac")
+			&& ! le_mot_est_reconnu(melange, "bbccbabacaaab")
+			, result
+		);
+		wrap_liberer_automate( aut1 );
+		wrap_liberer_automate( aut2 );
+		wrap_liberer_automate( melange );
+	}
+
+
+	{
 		Automate * aut1 = mot_to_automate("a");
 		Automate * aut2 = mot_to_automate("b");
 

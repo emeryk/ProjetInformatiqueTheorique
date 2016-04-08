@@ -538,6 +538,10 @@ void action_recuperer_accessibles_etat(intptr_t element, void* data){
   ajouter_elements(a->vide, delta1(a, etat, element));
 }
 
+/* Avec un Ensemble_iterateur, nous parcourons l'alphabet de l'automate passé en paramètre
+ Nous avons créé un Ensemble*, etat_acc, pour stocker les états qui sont accessibles à partir de "etat" par au moins une lettre de l'alphabet.
+Pour chaque lettre, on utilise la fonction delat1 qui renvoi un Ensemble d'état accessible depuis "etat" et une lettre.
+Nous envoyons etats_acc.*/
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
     Automate* a = copier_automate(automate);
     Ensemble* alp = copier_ensemble(get_alphabet(automate));
@@ -558,15 +562,16 @@ Ensemble* etats_accessibles( const Automate * automate, int etat ){
 }
 
 // On récupère l'ensemble d'états accessibles pour une lettre et l'ensemble d'états initiaux
-// On les stocke dans le champs vide de l'automate.
+// On stocke dans le champs vide de l'automate les ensembles que renvoit delta.
 void action_recuperer_accessibles(intptr_t element, void* data){
     Automate* a = (Automate*) data;
     Ensemble* ens = copier_ensemble(get_initiaux(a));
     ajouter_elements(a->vide, delta(a, ens, element));
 }
 
-// Pour chaque lettre de l'alphabet, on appelle action_recuperer_accessibles
-// Afin de stocker un ensmble avec tous les étas accessibles pour chaque lettre de l'alphabet de l'automate.
+/* Pour chaque lettre de l'alphabet, on appelle action_recuperer_accessibles
+ Afin de recupérer un ensemble avec tous les états accessibles pour chaque lettre de l'alphabet de l'automate.
+ Pour récupérer cet ensemble on utilise le champs vide de l'automate en s'assurant d'y remettre son contenu à la fin. */
 Ensemble* accessibles( const Automate * automate ){
     Automate* a = copier_automate(automate);
     Ensemble* alp = copier_ensemble(get_alphabet(automate));
@@ -577,9 +582,13 @@ Ensemble* accessibles( const Automate * automate ){
     result = copier_ensemble(a->vide);
     vider_ensemble( a->vide);
     deplacer_ensemble(a->vide, old_vide);
+
     return result;
 }
 
+/* On utilise la fonction creer_difference_ensemble afin d'obtenir les états non accessibles de l'automate
+  On remplace dans la copie de l'automate a l'ensemble d'états par les états non accessibles
+ On utilise la fonction translater_automate sur automate et a afin que l'automate accessible ait les états de automate mais évite ceux de a(les non accessibles).*/
 Automate *automate_accessible( const Automate * automate ){
     Automate* a = copier_automate(automate);
     Ensemble* etat_acc = accessibles(automate);
@@ -590,12 +599,13 @@ Automate *automate_accessible( const Automate * automate ){
     return accessible;
 }
 
-// Ajoute les transitions d'un premier automate à un second en inversant l'oigine et la fin des transitions
+// Ajoute les transitions d'un premier automate à un second en inversant l'origine et la fin des transitions
 void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
   Automate* a = (Automate*) data ;
   ajouter_transition(a, fin, lettre, origine);
 }
 
+/* On crée un automate 'a' qui a les états initiaux et finaux inverse de l'automate passé en paramètre. On lui ajoute le meme alphabet et les memes états que l'automate de départ (celui passé en paramètre). Pour chaque transition de l'automate de départ, on applqiue la fonction action_ajouter_transition_inverse à celle ci, ainsi on obtient une transition inversée ( 1 --a--> 2 devient alors 2 --a--> 1).   */ 
 Automate *miroir( const Automate * automate){
   Automate* a = creer_automate();
   Ensemble* ens;
@@ -617,6 +627,29 @@ Automate *miroir( const Automate * automate){
   return a;
 }
 
+/*
+  On a choisit de numéroter nos nouveaux états de la façon suivante : numéro_etat_automate_1 * 10 + numéro_etat_automate_2 on obtient donc un état numéroté 10 pour des états 1 et 0.
+
+  Les états initiaux sont des états crées à partir des états initiaux de chaque automate (état_init_1 * 10 + état_init_2)
+  De la meme manière on réalise les états finaux.
+
+  L'alphabet de l'automate du melange est l'union des alphabets des automates 1 et 2.
+
+  On applique l'algorithme suivant à chacun des automates :
+     Pour chaque état I de l'automate
+       Pour chaque lettre A de l'alphabet de l'automate
+         Pour chauque état F de l'automate
+	   Si (est_une_transition(I, A, F))
+	     Alors : Pour chaque état I2 de l'autre automate
+	               Pour chaque état F2 de l'autre automate
+		         Si (est_une_transition(I2, A, F2))
+			   Alors : ajouter_transition(automateMelange, I * 10 + I2, A, F * 10 + F2)
+			 Sinon 
+			   ajouter_transition(automateMelange, I * 10 + I2, A, F * 10 + I2)
+			   Fin
+
+  On renvoit alors l'automate créé.
+*/
 Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){ 
   
   Ensemble* alphabet1 = copier_ensemble(get_alphabet(automate_1));
@@ -635,9 +668,23 @@ Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate
 
   Automate* autMelange = creer_automate();
   /* Ajouts etats initiaux */
-  ajouter_etat_initial(autMelange, get_element(it_init1) * 10 + get_element(it_init2));
+  while(!iterateur_est_vide(it_init1)){
+    while(!iterateur_est_vide(it_init2)){
+      ajouter_etat_initial(autMelange, get_element(it_init1) * 10 + get_element(it_init2));
+      it_init2 = iterateur_suivant_ensemble(it_init2);
+    }
+    it_init2 = premier_iterateur_ensemble(init2);
+    it_init1 = iterateur_suivant_ensemble(it_init1);
+  }
   /* Ajouts etats finaux */
-  ajouter_etat_final(autMelange, get_element(it_final1) * 10 + get_element(it_final2));
+  while(!iterateur_est_vide(it_final1)){
+    while(!iterateur_est_vide(it_final2)){
+      ajouter_etat_final(autMelange, get_element(it_final1) * 10 + get_element(it_final2));
+      it_final2 = iterateur_suivant_ensemble(it_final2);
+    }
+    it_final2 = premier_iterateur_ensemble(final2);
+    it_final1 = iterateur_suivant_ensemble(it_final1);
+  }
     
   Ensemble* etats1 = copier_ensemble(get_etats(automate_1));
   Ensemble_iterateur it_etat1 = premier_iterateur_ensemble(etats1); 
@@ -651,7 +698,7 @@ Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate
 
  /* On obtient un etat de la forme 10 ou 11, le premier chiffre représente l'état de l'automate 1, le second celui du deuxième automate */
 
-  /* Parcour de l'automate 1 */  
+  /* Parcours de l'automate 1 */  
   while(!iterateur_est_vide(it_etat1)){
 
     etat1 = get_element(it_etat1);
@@ -749,5 +796,4 @@ Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate
   return autMelange;
 }
 
-  
-  
+
