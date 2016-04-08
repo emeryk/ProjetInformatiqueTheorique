@@ -34,12 +34,13 @@
 
 #include <math.h>
 
-
+/* Compare la valeur max à notre élement, si celle ci est inférieure à l'élement, alors max prend la valeur de l'élement */
 void action_get_max_etat( const intptr_t element, void* data){
 	int * max = (int*) data;
 	if ( *max < element ) *max = element;
 }
 
+/* Pour chaque état de l'automate, applique action_get_max et nous renvoie la valeur max, qui correspond à notre état maximum */
 int get_max_etat( const Automate* automate ){
 	int max = INT_MIN;
 
@@ -590,38 +591,163 @@ Automate *automate_accessible( const Automate * automate ){
 }
 
 // Ajoute les transitions d'un premier automate à un second en inversant l'oigine et la fin des transitions
-    void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
-        Automate* a = (Automate*) data ;
-        ajouter_transition(a, fin, lettre, origine);
-    }
+void action_ajouter_transition_inverse(int origine, char lettre, int fin, void* data){
+  Automate* a = (Automate*) data ;
+  ajouter_transition(a, fin, lettre, origine);
+}
 
-    Automate *miroir( const Automate * automate){
-        Automate* a = creer_automate();
-        Ensemble* ens;
+Automate *miroir( const Automate * automate){
+  Automate* a = creer_automate();
+  Ensemble* ens;
+  
+  ens = copier_ensemble(get_initiaux(automate));
+  pour_tout_element(ens, action_ajouter_etats_finaux, a);
+  
+  ens = copier_ensemble(get_finaux(automate));
+  pour_tout_element(ens, action_ajouter_etats_initiaux, a);
+  
+  ens = copier_ensemble(get_alphabet(automate));
+  pour_tout_element(ens, action_ajouter_alphabet, a);
+  
+  ens = copier_ensemble(get_etats(automate));
+  pour_tout_element(ens, action_ajouter_etats, a);
+  
+  pour_toute_transition(automate, action_ajouter_transition_inverse, a);
+  
+  return a;
+}
 
-        ens = copier_ensemble(get_initiaux(automate));
-        pour_tout_element(ens, action_ajouter_etats_finaux, a);
+Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){ 
+  
+  Ensemble* alphabet1 = copier_ensemble(get_alphabet(automate_1));
+  Ensemble* alphabet2 = copier_ensemble(get_alphabet(automate_2));
+  Ensemble* alphabet = creer_union_ensemble(alphabet1, alphabet2);
+  
+  Ensemble* init1 = copier_ensemble(get_initiaux(automate_1));
+  Ensemble* init2 = copier_ensemble(get_initiaux(automate_2));
+  Ensemble_iterateur it_init1 = premier_iterateur_ensemble(init1);
+  Ensemble_iterateur it_init2 = premier_iterateur_ensemble(init2);
+  
+  Ensemble* final1 = copier_ensemble(get_finaux(automate_1));
+  Ensemble* final2 = copier_ensemble(get_finaux(automate_2));
+  Ensemble_iterateur it_final1 = premier_iterateur_ensemble(final1);
+  Ensemble_iterateur it_final2 = premier_iterateur_ensemble(final2);
 
-        ens = copier_ensemble(get_finaux(automate));
-        pour_tout_element(ens, action_ajouter_etats_initiaux, a);
-
-        ens = copier_ensemble(get_alphabet(automate));
-        pour_tout_element(ens, action_ajouter_alphabet, a);
-
-        ens = copier_ensemble(get_etats(automate));
-        pour_tout_element(ens, action_ajouter_etats, a);
-
-        pour_toute_transition(automate, action_ajouter_transition_inverse, a);
-
-        return a;
-    }
-
-    char* melange(char* mot1, char* mot2){
-        char* w = strcat(mot1, mot2);
-        return w;
-    }
-
-/* Automate * creer_automate_du_melange(const Automate* automate_1,  const Automate* automate_2){ */
-
+  Automate* autMelange = creer_automate();
+  /* Ajouts etats initiaux */
+  ajouter_etat_initial(autMelange, get_element(it_init1) * 10 + get_element(it_init2));
+  /* Ajouts etats finaux */
+  ajouter_etat_final(autMelange, get_element(it_final1) * 10 + get_element(it_final2));
     
-/* } */
+  Ensemble* etats1 = copier_ensemble(get_etats(automate_1));
+  Ensemble_iterateur it_etat1 = premier_iterateur_ensemble(etats1); 
+  Ensemble_iterateur it_alphabet, it_etat_access1;
+  
+  Ensemble* etats2 = copier_ensemble(get_etats(automate_2));
+  Ensemble_iterateur it_etat2, it_etat_access2;
+  
+  char lettre;
+  int etat1, etat_access1, etat2, etat_access2;
+
+ /* On obtient un etat de la forme 10 ou 11, le premier chiffre représente l'état de l'automate 1, le second celui du deuxième automate */
+
+  /* Parcour de l'automate 1 */  
+  while(!iterateur_est_vide(it_etat1)){
+
+    etat1 = get_element(it_etat1);
+    it_alphabet = premier_iterateur_ensemble(alphabet);
+
+    while(!iterateur_est_vide(it_alphabet)){
+
+      lettre = get_element(it_alphabet);
+      it_etat_access1 = premier_iterateur_ensemble(etats1);
+
+      while(!iterateur_est_vide(it_etat_access1)){
+
+	etat_access1 = get_element(it_etat_access1);
+
+	  if(est_une_transition_de_l_automate(automate_1, etat1, lettre, etat_access1)){
+	    it_etat2 = premier_iterateur_ensemble(etats2);
+
+	    while(!iterateur_est_vide(it_etat2)){
+
+	      etat2 = get_element(it_etat2);
+	      it_etat_access2 = premier_iterateur_ensemble(etats2);
+
+	      while(!iterateur_est_vide(it_etat_access2)){
+
+		etat_access2 = get_element(it_etat_access2);
+
+		if(est_une_transition_de_l_automate(automate_2, etat2, lettre, etat_access2)){
+		  ajouter_transition(autMelange, (etat1 * 10 + etat2), lettre, (etat_access1 *10 + etat_access2));   
+		}
+		else{
+		  ajouter_transition(autMelange, (etat1 * 10 + etat2), lettre, (etat_access1 * 10 + etat2));
+		}
+
+		it_etat_access2 = iterateur_suivant_ensemble(it_etat_access2);
+	      }
+	      it_etat2 = iterateur_suivant_ensemble(it_etat2);
+	    }
+	  }
+	  it_etat_access1 = iterateur_suivant_ensemble(it_etat_access1);
+      }	
+      it_alphabet = iterateur_suivant_ensemble(it_alphabet);
+    }
+    it_etat1 = iterateur_suivant_ensemble(it_etat1);
+  }
+
+  /*Parcours de l'automate 2*/
+  
+  it_etat2 = premier_iterateur_ensemble(etats2);
+
+  while(!iterateur_est_vide(it_etat2)){
+
+    etat2 = get_element(it_etat2);
+    it_alphabet = premier_iterateur_ensemble(alphabet);
+
+    while(!iterateur_est_vide(it_alphabet)){
+
+      lettre = get_element(it_alphabet);
+      it_etat_access2 = premier_iterateur_ensemble(etats2);
+
+      while(!iterateur_est_vide(it_etat_access2)){
+
+	etat_access2 = get_element(it_etat_access2);
+
+	  if(est_une_transition_de_l_automate(automate_2, etat2, lettre, etat_access2)){
+	    it_etat1 = premier_iterateur_ensemble(etats1);
+
+	    while(!iterateur_est_vide(it_etat1)){
+
+	      etat1 = get_element(it_etat1);
+	      it_etat_access1 = premier_iterateur_ensemble(etats1);
+
+	      while(!iterateur_est_vide(it_etat_access1)){
+
+		etat_access1 = get_element(it_etat_access1);
+
+		if(est_une_transition_de_l_automate(automate_1, etat1, lettre, etat_access1)){
+		  ajouter_transition(autMelange, (etat1 * 10 + etat2), lettre, (etat_access1 *10 + etat_access2));   
+		}
+		else{
+		  ajouter_transition(autMelange, (etat1 * 10 + etat2), lettre, (etat1 * 10 + etat_access2));
+		}
+
+		it_etat_access1 = iterateur_suivant_ensemble(it_etat_access1);
+	      }
+	      it_etat1 = iterateur_suivant_ensemble(it_etat1);
+	    }
+	  }
+	  it_etat_access2 = iterateur_suivant_ensemble(it_etat_access2);
+      }	
+      it_alphabet = iterateur_suivant_ensemble(it_alphabet);
+    }
+    it_etat2 = iterateur_suivant_ensemble(it_etat2);
+  }
+
+  return autMelange;
+}
+
+  
+  
